@@ -501,6 +501,7 @@ try {
                         @{name="wp.pos"; usage="wp.pos [player]"; description="Get player positions"; category="players"},
                         @{name="wp.stamina"; usage="wp.stamina [player]"; description="Read stamina/hunger/thirst"; category="players"},
                         @{name="wp.speed"; usage="wp.speed [player] <mult>"; description="Set movement speed"; category="admin"},
+                        @{name="wp.sethealth"; usage="wp.sethealth <player> <value>"; description="Set a player's current health"; category="admin"},
                         @{name="wp.time"; usage="wp.time"; description="Read current time of day"; category="world"},
                         @{name="wp.creatures"; usage="wp.creatures"; description="Count spawned creatures by type"; category="world"},
                         @{name="wp.entities"; usage="wp.entities"; description="Count entities by type"; category="world"},
