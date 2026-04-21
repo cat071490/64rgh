@@ -365,6 +365,27 @@ Speed set to 2.0x for 3 player(s)
 Speed set to 1.5x for humangenome
 ```
 
+### wp.sethealth
+
+Set a player's current health. Writes directly to `R5Character.HealthComponent.CurrentHealth`. The game clamps to `MaxHealth`, so the response reports the value that was actually applied (useful to spot capping). Player name is required — all-players form is intentionally not supported to avoid accidental mass-kill / mass-heal.
+
+```
+Usage: wp.sethealth <player> <value>
+```
+
+Value range: 0 to 1000000. Names containing spaces are handled — the last token is the value, everything before is the player name.
+
+```
+> wp.sethealth HumanGenome 100
+HumanGenome: health set to 100/100
+
+> wp.sethealth John Smith 50
+John Smith: health set to 50/100
+
+> wp.sethealth HumanGenome 999999
+HumanGenome: health set to 100/100
+```
+
 ---
 
 ## Debug
