@@ -345,6 +345,68 @@ function Admin._registerCommands()
         end
     }
 
+    Admin._commands["wp.sethealth"] = {
+        description = "Set a player's current health",
+        usage = "wp.sethealth <player> <value>",
+        category = "admin",
+        examples = {"wp.sethealth HumanGenome 100", "wp.sethealth John Smith 50", "wp.sethealth HumanGenome 0"},
+        playerArg = true,
+        handler = function(args)
+            if #args < 2 then
+                return "Usage: wp.sethealth <player> <value>\n  value: 0-1000000 (game clamps to MaxHealth)"
+            end
+
+            -- Last arg is the value; everything before joins as the player name.
+            -- RCON tokenizes on whitespace and names can contain spaces.
+            -- Mirrors wp.speed/wp.givestats parsing (Issue: HumanGenome/WindrosePlus#5).
+            local n = #args
+            local value = tonumber(args[n])
+            if not value then
+                return "Value must be a number between 0 and 1000000"
+            end
+            if value < 0 or value > 1000000 then
+                return "Value must be between 0 and 1000000"
+            end
+            local targetName = table.concat(args, " ", 1, n - 1)
+            if targetName == "" then return "Player name required" end
+
+            local matched = Admin._findPlayersByName(targetName)
+            if #matched == 0 then return "Player '" .. targetName .. "' not found" end
+
+            local chars = FindAllOf("R5Character")
+            if not chars then return "No character data" end
+
+            local lines = {}
+            for _, p in ipairs(matched) do
+                local touched = false
+                for _, char in ipairs(chars) do
+                    if char:IsValid() then
+                        local charName = nil
+                        pcall(function() charName = char:GetFullName():match("([^%.]+)$") end)
+                        if charName == p.name then
+                            pcall(function()
+                                local hc = char.HealthComponent
+                                if hc and hc:IsValid() then
+                                    hc.CurrentHealth = value
+                                    -- Read back so the response reflects any game-side clamping
+                                    local actual = hc.CurrentHealth
+                                    local maxHp = hc.MaxHealth
+                                    table.insert(lines, p.name .. ": health set to " .. tostring(actual) .. "/" .. tostring(maxHp))
+                                    touched = true
+                                end
+                            end)
+                            break
+                        end
+                    end
+                end
+                if not touched then
+                    table.insert(lines, p.name .. ": no HealthComponent")
+                end
+            end
+            return table.concat(lines, "\n")
+        end
+    }
+
     Admin._commands["wp.pos"] = {
         description = "Get player positions",
         usage = "wp.pos [player]",
